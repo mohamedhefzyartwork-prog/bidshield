@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Stress-test recurring commercial cleaning bids before you sign the contract.">
+<title>BidShield — Free Bid Breaker</title>
+<style>
+:root{--bg:#0a0d10;--panel:#12171c;--panel2:#0e1318;--line:#29313a;--text:#f4f7f9;--muted:#9ba7b4;--good:#33d17a;--warn:#ffb020;--bad:#ff6262;--blue:#62adff}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+.wrap{max-width:1040px;margin:auto;padding:32px 18px 70px}.hero{padding:36px 0 22px}.eyebrow{font-size:12px;letter-spacing:.18em;font-weight:850;color:var(--blue)}
+h1{font-size:clamp(38px,6vw,68px);line-height:1.01;letter-spacing:-.035em;margin:12px 0 16px;max-width:940px}.sub{font-size:18px;line-height:1.55;color:var(--muted);max-width:780px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px}.field{margin-bottom:15px}
+label{display:block;color:var(--muted);font-size:13px;margin-bottom:7px}input,select{width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:11px;padding:13px 14px;font-size:16px;outline:none}
+input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(98,173,255,.12)}button{width:100%;border:0;border-radius:12px;padding:15px 18px;font-weight:900;font-size:16px;cursor:pointer;background:#fff;color:#080a0c}
+button:disabled{opacity:.65;cursor:wait}.note{font-size:12px;line-height:1.5;color:var(--muted)}.hidden{display:none!important}.error{padding:12px;border-radius:10px;background:#2b1518;border:1px solid #673038;color:#ffc1c1;margin-bottom:14px}
+.status{font-size:14px;font-weight:900;letter-spacing:.08em}.big{font-size:58px;line-height:.95;font-weight:950;letter-spacing:-.04em;margin:10px 0 8px}.kicker{font-size:15px;font-weight:800}.muted{color:var(--muted)}
+.good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.metric{display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid var(--line);padding:13px 0}.metric:last-child{border:0}.metric span:first-child{color:var(--muted)}.metric strong{text-align:right}
+.result-section{margin-top:16px}.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}.table{width:100%;min-width:680px;border-collapse:collapse;font-size:14px}.table th,.table td{padding:11px 9px;border-bottom:1px solid var(--line);text-align:right}.table th:first-child,.table td:first-child{text-align:left}
+.pass{color:var(--good);font-weight:850}.fail{color:var(--bad);font-weight:850}.decision{font-size:16px;line-height:1.6}.decision strong{font-weight:900}.pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:6px 9px;font-size:12px;margin-right:6px;margin-bottom:6px;color:var(--muted)}
+.footer{margin-top:28px;color:var(--muted);font-size:12px;line-height:1.55}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.wrap{padding:20px 14px 55px}.hero{padding-top:22px}.big{font-size:48px}h1{font-size:clamp(38px,12vw,56px)}.card{padding:18px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <div class="eyebrow">BIDSHIELD · FREE BID BREAKER</div>
+    <h1>Your cleaning bid looks profitable. How wrong can you afford to be?</h1>
+    <div class="sub">Stress-test a recurring commercial cleaning contract using your own labor assumptions and your own minimum margin. No generic market-price guesses.</div>
+  </section>
+
+  <div class="grid">
+    <div class="card">
+      <div id="err" class="error hidden"></div>
+      <div class="field"><label>Monthly contract price ($)</label><input id="price" type="number" min="0.01" step="0.01" value="5000"></div>
+      <div class="field"><label>Visits per week</label><input id="visits" type="number" min="0.01" step="0.01" value="5"></div>
+      <div class="field"><label>Estimated man-hours per visit</label><input id="hours" type="number" min="0.01" step="0.01" value="5"></div>
+      <div class="field"><label>Fully loaded labor cost / hour ($)</label><input id="rate" type="number" min="0.01" step="0.01" value="25"></div>
+      <div class="field"><label>Other monthly job costs ($)</label><input id="other" type="number" min="0" step="0.01" value="700"></div>
+      <div class="field"><label>Minimum acceptable margin (%)</label><input id="minmargin" type="number" min="0" max="99.9" step="0.1" value="25"></div>
+      <div class="field"><label>Labor estimate source (optional)</label>
+        <select id="source"><option value="unknown">Not specified</option><option value="historical">Actual historical job</option><option value="timed">Timed walkthrough/test</option><option value="benchmark">Production-rate benchmark</option><option value="judgment">Experience / judgment</option><option value="guess">Guess</option></select>
+      </div>
+      <button id="calculateBtn" type="button">BREAK MY BID</button>
+      <p class="note">Man-hours means total labor. Two cleaners working 3 hours each = 6 man-hours.</p>
+    </div>
+
+    <div class="card" id="summary">
+      <div class="status muted">READY FOR INPUT</div>
+      <div class="big">—</div>
+      <div class="kicker">Run the stress test to see the decision.</div>
+      <p class="note">BidShield measures how much error your current pricing can absorb before it falls below your minimum acceptable margin.</p>
+    </div>
+  </div>
+
+  <div id="results" class="hidden">
+    <div class="grid result-section">
+      <div class="card"><h2>Bid Survival Report</h2><div id="metrics"></div></div>
+      <div class="card"><h2>Breakpoints</h2><div id="breakpoints"></div></div>
+    </div>
+    <div class="card result-section">
+      <h2>Stress Test</h2>
+      <div class="table-wrap"><table class="table"><thead><tr><th>Scenario</th><th>Profit</th><th>Margin</th><th>Δ Profit</th><th>Status</th></tr></thead><tbody id="stress"></tbody></table></div>
+      <p class="note">These are sensitivity scenarios, not forecasts. They show what happens if the assumptions entered turn out to be wrong.</p>
+    </div>
+    <div class="card result-section">
+      <h2>Decision</h2>
+      <div id="decision" class="decision"></div>
+    </div>
+  </div>
+
+  <div class="footer">Operational decision-support only. BidShield does not provide accounting, tax, legal, or contractual advice. Results depend entirely on the assumptions entered.</div>
+</div>
+
+<script>
+const EPS=1e-9;
+function analyzeBid(x){
+  const {price,visits,hours,rate,other,minMargin,source='unknown'}=x;
+  const vals=[price,visits,hours,rate,other,minMargin];
+  if(!vals.every(Number.isFinite)||price<=0||visits<=0||hours<=0||rate<=0||other<0||minMargin<0||minMargin>=1){
+    return {ok:false,error:'Check the inputs: contract price, visits, hours and labor rate must be above zero; other costs cannot be negative; minimum margin must be between 0% and 99.9%.'};
+  }
+  const monthlyVisits=visits*52/12;
+  const monthlyLaborHours=hours*monthlyVisits;
+  const laborCost=monthlyLaborHours*rate;
+  const totalCost=laborCost+other;
+  const profit=price-totalCost;
+  const margin=profit/price;
+  const maxAllowableCost=price*(1-minMargin);
+  const maxLaborBudget=maxAllowableCost-other;
+  const maxSafeHours=maxLaborBudget>0?maxLaborBudget/(rate*monthlyVisits):0;
+  const laborBuffer=maxSafeHours-hours;
+  const laborTolerance=laborBuffer/hours;
+  const maxSafeRate=maxLaborBudget>0?maxLaborBudget/monthlyLaborHours:0;
+  const rateTolerance=(maxSafeRate-rate)/rate;
+  const otherBuffer=maxAllowableCost-laborCost-other;
+  const otherTolerance=other>0?otherBuffer/other:Infinity;
+  const minSafePrice=totalCost/(1-minMargin);
+  const priceGap=Math.max(0,minSafePrice-price);
+  const unsafe=margin<minMargin-EPS;
+
+  let label, tone;
+  if(unsafe){label='UNSAFE';tone='bad';}
+  else if(laborTolerance<0.05){label='HIGH RISK';tone='bad';}
+  else if(laborTolerance<0.15){label='FRAGILE';tone='warn';}
+  else if(laborTolerance<0.25){label='ACCEPTABLE';tone='warn';}
+  else{label='ROBUST';tone='good';}
+
+  let primary='Labor hours / labor rate';
+  if(otherTolerance < Math.min(laborTolerance,rateTolerance)-EPS) primary='Other costs';
+  else if(Math.abs(laborTolerance-rateTolerance)>EPS) primary=laborTolerance<rateTolerance?'Labor hours':'Labor rate';
+
+  const scenarioDefs=[
+    ['BASE',1,1,1,0],['Labor hours +10%',1.10,1,1,0],['Labor hours +20%',1.20,1,1,0],
+    ['Labor $/hr +10%',1,1.10,1,0],['Other costs +15%',1,1,1.15,0],
+    ['+30 min / visit',1,1,1,0.5],['+60 min / visit',1,1,1,1],
+    ['COMBO',1.10,1.05,1.10,0],['SEVERE',1.20,1.10,1.15,0]
+  ];
+  const scenarios=scenarioDefs.map(([name,hm,rm,om,extra])=>{
+    const lc=(hours*hm+extra)*monthlyVisits*(rate*rm);
+    const tc=lc+other*om;
+    const p=price-tc, m=p/price;
+    return {name,profit:p,margin:m,deltaProfit:p-profit,pass:m>=minMargin-EPS};
+  });
+  const passCount=scenarios.filter(s=>s.pass).length;
+  const severeLoss=scenarios.find(s=>s.name==='SEVERE').profit<0;
+  const labor20Loss=Math.max(0,profit-scenarios.find(s=>s.name==='Labor hours +20%').profit);
+
+  const confidence=source==='historical'||source==='timed'?'HIGH':source==='benchmark'||source==='judgment'?'MEDIUM':source==='guess'?'LOW':'UNKNOWN';
+
+  return {ok:true,price,visits,hours,rate,other,minMargin,monthlyVisits,monthlyLaborHours,laborCost,totalCost,profit,margin,maxAllowableCost,maxLaborBudget,maxSafeHours,laborBuffer,laborTolerance,maxSafeRate,rateTolerance,otherBuffer,otherTolerance,minSafePrice,priceGap,unsafe,label,tone,primary,scenarios,passCount,severeLoss,labor20Loss,confidence};
+}
+
+const money0=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n);
+const money2=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
+const pct=n=>(n*100).toFixed(1)+'%';
+const mins=h=>Math.round(Math.abs(h)*60)+' min';
+const metric=(k,v)=>`<div class="metric"><span>${k}</span><strong>${v}</strong></div>`;
+
+function readInputs(){return {
+  price:+document.getElementById('price').value,
+  visits:+document.getElementById('visits').value,
+  hours:+document.getElementById('hours').value,
+  rate:+document.getElementById('rate').value,
+  other:+document.getElementById('other').value,
+  minMargin:+document.getElementById('minmargin').value/100,
+  source:document.getElementById('source').value
+};}
+
+function render(r){
+  const err=document.getElementById('err'),results=document.getElementById('results'),summary=document.getElementById('summary');
+  if(!r.ok){
+    err.textContent=r.error;err.classList.remove('hidden');results.classList.add('hidden');
+    summary.innerHTML='<div class="status bad">INVALID INPUT</div><div class="big">—</div><div class="kicker">Correct the assumptions and run the bid again.</div>';
+    return;
+  }
+  err.classList.add('hidden');
+
+  if(r.unsafe){
+    summary.innerHTML=`<div class="status bad">UNSAFE BID</div><div class="big">${money0(r.priceGap)}</div><div class="kicker">MONTHLY PRICE GAP</div><p class="note">Current margin: ${pct(r.margin)} · Minimum acceptable: ${pct(r.minMargin)}<br>Minimum safe monthly price: ${money0(r.minSafePrice)}</p>`;
+  }else{
+    summary.innerHTML=`<div class="status ${r.tone}">${r.label} BID</div><div class="big">${pct(r.laborTolerance)}</div><div class="kicker">LABOR ERROR TOLERANCE</div><p class="note">Current margin: ${pct(r.margin)} · Minimum acceptable: ${pct(r.minMargin)}</p>`;
+  }
+
+  document.getElementById('metrics').innerHTML=
+    metric('Monthly visits',r.monthlyVisits.toFixed(2))+
+    metric('Monthly labor hours',r.monthlyLaborHours.toFixed(1))+
+    metric('Monthly labor cost',money0(r.laborCost))+
+    metric('Total monthly cost',money0(r.totalCost))+
+    metric('Monthly profit',money0(r.profit))+
+    metric('Current margin',pct(r.margin));
+
+  const timeLabel=r.laborBuffer>=0?'Labor time buffer / visit':'Labor over safe limit / visit';
+  const costLabel=r.otherBuffer>=0?'Other-cost buffer':'Other costs over safe limit';
+  document.getElementById('breakpoints').innerHTML=
+    metric('Maximum safe man-hours / visit',r.maxSafeHours.toFixed(2))+
+    metric(timeLabel,mins(r.laborBuffer))+
+    metric('Maximum safe loaded labor rate',money2(r.maxSafeRate)+'/hr')+
+    metric(costLabel,money0(Math.abs(r.otherBuffer)))+
+    metric('Minimum safe monthly price',money0(r.minSafePrice))+
+    metric('Primary vulnerability',r.primary);
+
+  document.getElementById('stress').innerHTML=r.scenarios.map(s=>`<tr><td>${s.name}</td><td>${money0(s.profit)}</td><td>${pct(s.margin)}</td><td>${money0(s.deltaProfit)}</td><td class="${s.pass?'pass':'fail'}">${s.pass?'PASS':'FAIL'}</td></tr>`).join('');
+
+  let decision='';
+  if(r.unsafe){
+    decision=`<p class="bad"><strong>DO NOT SIGN AT CURRENT TERMS.</strong> This bid is below your stated margin floor.</p>
+    <p>To reach ${pct(r.minMargin)}, choose at least one of these fixes:</p>
+    <div><span class="pill">Raise price to ≥ ${money0(r.minSafePrice)}</span><span class="pill">Labor ≤ ${r.maxSafeHours.toFixed(2)} hrs/visit</span><span class="pill">Loaded labor ≤ ${money2(r.maxSafeRate)}/hr</span>${r.otherBuffer<0?`<span class="pill">Cut other costs by ≥ ${money0(-r.otherBuffer)}</span>`:''}</div>`;
+  }else if(r.label==='HIGH RISK'){
+    decision=`<p class="bad"><strong>VERIFY OR REPRICE BEFORE SIGNING.</strong> You have only about ${mins(r.laborBuffer)} of labor buffer per visit before the contract falls below your margin floor.</p>`;
+  }else if(r.label==='FRAGILE'){
+    decision=`<p class="warn"><strong>VERIFY THE LABOR ASSUMPTION.</strong> The bid is profitable at the entered assumptions, but the safety buffer is limited to about ${mins(r.laborBuffer)} per visit.</p>`;
+  }else if(r.label==='ACCEPTABLE'){
+    decision=`<p><strong>WORKABLE BUFFER.</strong> The bid can absorb about ${pct(r.laborTolerance)} additional labor before falling below your margin floor. Validate the labor estimate before signing.</p>`;
+  }else{
+    decision=`<p class="good"><strong>HEALTHY BUFFER.</strong> The bid can absorb about ${pct(r.laborTolerance)} more labor, roughly ${mins(r.laborBuffer)} per visit, before falling below your margin floor.</p>`;
+  }
+  decision+=`<p><strong>Primary vulnerability:</strong> ${r.primary}<br><strong>Stress tests passed:</strong> ${r.passCount}/${r.scenarios.length}<br><strong>Assumption confidence:</strong> ${r.confidence}</p>`;
+  if(r.confidence==='LOW') decision+=`<p class="warn"><strong>Low-confidence warning:</strong> your labor estimate is marked as a guess. A strong financial buffer does not make an uncertain labor assumption reliable.</p>`;
+  decision+=`<p><strong>20% labor-overrun profit exposure:</strong> ${money0(r.labor20Loss)}/month (${money0(r.labor20Loss*12)}/year if sustained).</p>`;
+  if(r.severeLoss) decision+=`<p class="bad"><strong>Severe-case warning:</strong> the severe stress scenario produces a monthly loss.</p>`;
+  document.getElementById('decision').innerHTML=decision;
+  results.classList.remove('hidden');
+  setTimeout(()=>results.scrollIntoView({behavior:'smooth',block:'start'}),80);
+}
+
+function calculate(){
+  const btn=document.getElementById('calculateBtn');
+  btn.disabled=true;btn.textContent='CALCULATING...';
+  const r=analyzeBid(readInputs());render(r);
+  setTimeout(()=>{btn.textContent='BREAK MY BID';btn.disabled=false;},450);
+}
+document.getElementById('calculateBtn').addEventListener('click',calculate);
+document.querySelectorAll('input,select').forEach(el=>el.addEventListener('keydown',e=>{if(e.key==='Enter')calculate();}));
+</script>
+</body>
+</html>
